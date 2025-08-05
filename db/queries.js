@@ -82,6 +82,10 @@ const getCommentsByPostId = async (id) => {
 const addNewComment = async (postId, comment, userId) => {
     try {
         await pool.query(`INSERT INTO comments(post_id,comment_content,user_id) VALUES ($1,$2,$3)`, [postId, comment, userId])
+        await pool.query(
+            "UPDATE posts SET comments_count = comments_count + 1 WHERE post_id = $1",
+            [postId]
+        );
 
     } catch (error) {
         console.log(error.message)
