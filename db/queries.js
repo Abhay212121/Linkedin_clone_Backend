@@ -52,4 +52,40 @@ const updateLike = async (countChange, postId) => {
     );
 }
 
-module.exports = { addUserToDb, getUserFromDb, savePostInDb, getAllPosts, updateUserProfile, updateLike }
+const getPostDataById = async (id) => {
+    try {
+        const { rows } = await pool.query(`
+        SELECT posts.*, users.user_name, users.user_jobrole, users.user_mail 
+        FROM posts 
+        JOIN users ON posts.user_id = users.user_id
+        WHERE posts.post_id = $1
+        `, [id])
+        return rows[0]
+    } catch (error) {
+        console.log(error.message)
+    }
+}
+
+const getCommentsByPostId = async (id) => {
+    try {
+        const { rows } = await pool.query(`SELECT  comments.comment_id,
+        comments.comment_content,
+        comments.created_at,
+        users.user_name,
+        users.user_id FROM comments JOIN users ON comments.user_id = users.user_id WHERE comments.post_id = $1 ORDER BY comments.created_at DESC`, [id])
+        return rows
+    } catch (error) {
+        console.log(error.message)
+    }
+}
+
+const addNewComment = async (postId, comment, userId) => {
+    try {
+        await pool.query(`INSERT INTO comments(post_id,comment_content,user_id) VALUES ($1,$2,$3)`, [postId, comment, userId])
+
+    } catch (error) {
+        console.log(error.message)
+    }
+}
+
+module.exports = { addUserToDb, getUserFromDb, savePostInDb, getAllPosts, updateUserProfile, updateLike, getPostDataById, getCommentsByPostId, addNewComment }

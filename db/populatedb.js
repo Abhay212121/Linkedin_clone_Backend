@@ -35,6 +35,9 @@ CREATE TABLE IF NOT EXISTS comments(
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 )
 `
+const addComment = `
+INSERT INTO comments(post_id,comment_content,user_id) VALUES(12,'Excellent Work!👍👍',7);
+`
 
 async function main() {
     console.log('Sending...');
@@ -46,7 +49,7 @@ async function main() {
         await client.connect();
         // await client.query(createUserSQL);
         // await client.query(postSQL);
-        await client.query(commentSQL);
+        await client.query(addComment);
         console.log('Done!');
     } catch (err) {
         console.error('Error executing query:', err);
