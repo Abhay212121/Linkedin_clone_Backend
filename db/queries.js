@@ -92,4 +92,16 @@ const addNewComment = async (postId, comment, userId) => {
     }
 }
 
-module.exports = { addUserToDb, getUserFromDb, savePostInDb, getAllPosts, updateUserProfile, updateLike, getPostDataById, getCommentsByPostId, addNewComment }
+const getAllUsersThatMatchesSearch = async (searchTerm) => {
+    try {
+        const { rows } = await pool.query(
+            `SELECT user_id, user_name FROM users WHERE LOWER(user_name) LIKE $1`,
+            [`%${searchTerm}%`]
+        );
+        return rows;
+    } catch (error) {
+        console.log(error.message);
+    }
+};
+
+module.exports = { addUserToDb, getUserFromDb, savePostInDb, getAllPosts, updateUserProfile, updateLike, getPostDataById, getCommentsByPostId, addNewComment, getAllUsersThatMatchesSearch }

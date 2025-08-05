@@ -80,5 +80,15 @@ const updateProfile = async (req, res) => {
     }
 }
 
+const getAllUsers = async (req, res) => {
+    let searchTerm = req.body.searchTerm
+    searchTerm = searchTerm.toLowerCase()
+    try {
+        const result = await db.getAllUsersThatMatchesSearch(searchTerm)
+        return res.json({ status: 200, userData: result })
+    } catch (error) {
+        return res.json({ status: 500, msg: error.message })
+    }
+}
 
-module.exports = { postUserToDb, loginUser, updateProfile }
+module.exports = { postUserToDb, loginUser, updateProfile, getAllUsers }
