@@ -1,15 +1,47 @@
 const db = require('../db/queries')
+const cloudinary = require('../services/cloudinary')
 
 const createPost = async (req, res) => {
-    const userId = req.user_id
-    const postContent = req.body.postContent
+    const userId = req.user_id;
+    const postContent = req.body.postContent;
+    const image = req.file;
+
     try {
-        await db.savePostInDb(userId, postContent)
-        return res.json({ status: 200, msg: 'doen' })
+        let imgUrl = null;
+
+        if (image) {
+            // Upload with resize & quality optimization
+            const uploadImage = await new Promise((resolve, reject) => {
+                const stream = cloudinary.uploader.upload_stream(
+                    {
+                        resource_type: 'image',
+                        folder: 'posts',
+                        transformation: [
+                            { width: 1080, height: 1080, crop: 'limit' }, // limit max resolution
+                            { quality: 'auto' }, // automatic compression
+                            { fetch_format: 'auto' } // auto WebP/AVIF for smaller size
+                        ]
+                    },
+                    (error, result) => {
+                        if (error) reject(error);
+                        else resolve(result);
+                    }
+                );
+
+                stream.end(image.buffer);
+            });
+
+            imgUrl = uploadImage.secure_url;
+        }
+
+        await db.savePostInDb(userId, postContent, imgUrl);
+
+        return res.json({ status: 200, msg: 'done', image: imgUrl });
     } catch (error) {
-        return res.json({ status: 500, msg: error.message })
+        return res.json({ status: 500, msg: error.message });
     }
-}
+};
+
 
 const getPosts = async (req, res) => {
     const email = req.user_mail

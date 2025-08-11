@@ -13,9 +13,9 @@ const getUserFromDb = async (email) => {
     return rows
 }
 
-const savePostInDb = async (userId, postContent) => {
+const savePostInDb = async (userId, postContent, imgUrl) => {
     try {
-        await pool.query(`INSERT INTO posts(user_id,post_content) VALUES($1,$2)`, [userId, postContent])
+        await pool.query(`INSERT INTO posts(user_id,post_content,img_url) VALUES($1,$2,$3)`, [userId, postContent, imgUrl])
     } catch (error) {
         console.log(error.message)
     }

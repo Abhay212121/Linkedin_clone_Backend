@@ -49,7 +49,9 @@ async function main() {
         await client.connect();
         // await client.query(createUserSQL);
         // await client.query(postSQL);
-        await client.query(`ALTER TABLE posts ADD COLUMN comments_count INTEGER DEFAULT 0;
+        await client.query(`ALTER TABLE posts
+        ADD COLUMN img_url TEXT;
+        ;
         `);
         console.log('Done!');
     } catch (err) {
