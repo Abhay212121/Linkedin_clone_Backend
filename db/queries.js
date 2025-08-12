@@ -115,7 +115,7 @@ const getAllUsersThatMatchesSearch = async (searchTerm) => {
 
 const getProfileDataFromDb = async (id) => {
     try {
-        const { rows } = await pool.query(`SELECT user_id,user_name,user_mail,user_jobrole,created_at,user_description,user_skills,user_location, FROM users WHERE user_id = $1`, [id])
+        const { rows } = await pool.query(`SELECT user_id,user_name,user_mail,user_jobrole,created_at,user_description,user_skills,user_location FROM users WHERE user_id = $1`, [id])
         return rows
     } catch (error) {
         console.log(error.message)
