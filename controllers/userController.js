@@ -68,17 +68,35 @@ const loginUser = async (req, res) => {
 }
 
 const updateProfile = async (req, res) => {
-    const email = req.user_mail
-    const job = req.body.job
-    const org = req.body.org
-    const result = job.trim() + ' at ' + org.trim()
+    const email = req.user_mail;
+    const job = req.body.job?.trim();
+    const org = req.body.org?.trim();
+    const location = req.body.location?.trim();
+    const about = req.body.about?.trim();
+
+    let skills = req.body.skills || "";
+    skills = skills
+        .split(",")
+        .map((s) => s.trim())
+        .filter((s) => s.length > 0);
+
+    const result = `${job} at ${org}`;
+
     try {
-        await db.updateUserProfile(result, email)
-        return res.json({ status: 200, msg: 'Profile updated.', job: result })
+        await db.updateUserProfile(result, email, location, about, skills);
+        return res.json({
+            status: 200,
+            msg: "Profile updated.",
+            job: result,
+        });
     } catch (error) {
-        return res.json({ status: 500, msg: error.message })
+        return res.json({
+            status: 500,
+            msg: error.message,
+        });
     }
-}
+};
+
 
 const getAllUsers = async (req, res) => {
     let searchTerm = req.body.searchTerm
@@ -91,4 +109,14 @@ const getAllUsers = async (req, res) => {
     }
 }
 
-module.exports = { postUserToDb, loginUser, updateProfile, getAllUsers }
+const getUserProfile = async (req, res) => {
+    const userId = req.query.userIdNum
+    try {
+        const userData = await db.getProfileDataFromDb(userId)
+        return res.json({ status: 200, userData: userData[0] })
+    } catch (error) {
+        return res.json({ status: 500, error: error.message })
+    }
+}
+
+module.exports = { postUserToDb, loginUser, updateProfile, getAllUsers, getUserProfile }

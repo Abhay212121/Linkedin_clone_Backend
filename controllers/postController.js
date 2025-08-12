@@ -101,4 +101,17 @@ const addNewComment = async (req, res) => {
     }
 }
 
-module.exports = { createPost, getPosts, updateLike, getPostData, getcomments, addNewComment }
+const getuserposts = async (req, res) => {
+    const userId = req.query.userIdNum;
+    try {
+        const data = await db.getAllPostsByUserId(userId)
+        if (data) {
+            return res.json({ status: 200, posts: data })
+        }
+        return res.json({ status: 404, msg: 'Posts not found!' })
+    } catch (error) {
+        return res.status({ status: 500, msg: error.message })
+    }
+}
+
+module.exports = { createPost, getPosts, updateLike, getPostData, getcomments, addNewComment, getuserposts }

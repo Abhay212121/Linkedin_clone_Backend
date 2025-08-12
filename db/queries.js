@@ -36,14 +36,23 @@ const getAllPosts = async () => {
     }
 };
 
-const updateUserProfile = async (job, email) => {
+const updateUserProfile = async (job, email, location, about, skills) => {
     try {
-        await pool.query(`UPDATE users SET user_jobrole = $1 WHERE user_mail = $2`, [job, email])
-        console.log('done')
+        await pool.query(
+            `UPDATE users
+         SET user_jobrole = $1,
+             user_location = $2,
+             user_description = $3,
+             user_skills = $4
+         WHERE user_mail = $5`,
+            [job, location, about, skills, email]
+        );
+        console.log('Profile updated successfully');
     } catch (error) {
-        console.log(error.message)
+        console.error('Error updating profile:', error.message);
     }
-}
+};
+
 
 const updateLike = async (countChange, postId) => {
     await pool.query(
@@ -104,4 +113,27 @@ const getAllUsersThatMatchesSearch = async (searchTerm) => {
     }
 };
 
-module.exports = { addUserToDb, getUserFromDb, savePostInDb, getAllPosts, updateUserProfile, updateLike, getPostDataById, getCommentsByPostId, addNewComment, getAllUsersThatMatchesSearch }
+const getProfileDataFromDb = async (id) => {
+    try {
+        const { rows } = await pool.query(`SELECT * FROM users WHERE user_id = $1`, [id])
+        return rows
+    } catch (error) {
+        console.log(error.message)
+    }
+}
+
+const getAllPostsByUserId = async (id) => {
+    try {
+        const { rows } = await pool.query(`
+        SELECT posts.*, users.user_name, users.user_jobrole, users.user_mail 
+        FROM posts 
+        JOIN users ON posts.user_id = users.user_id
+        WHERE users.user_id = $1
+        `, [id])
+        return rows
+    } catch (error) {
+        console.log(error.message)
+    }
+}
+
+module.exports = { addUserToDb, getUserFromDb, savePostInDb, getAllPosts, updateUserProfile, updateLike, getPostDataById, getCommentsByPostId, addNewComment, getAllUsersThatMatchesSearch, getProfileDataFromDb, getAllPostsByUserId }
