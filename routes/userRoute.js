@@ -13,6 +13,6 @@ userRoute.post('/updateprofile', verifyToken, updateProfile)
 userRoute.post('/updateuserpfp', verifyToken, upload.single('image'), updateUserPfp)
 userRoute.get('/getpfp', verifyToken, getUserPfp)
 userRoute.post('/getallusers', getAllUsers)
-userRoute.get('/getuserprofile', getUserProfile)
+userRoute.get('/getuserprofile', verifyToken, getUserProfile)
 
 module.exports = userRoute

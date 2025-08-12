@@ -112,9 +112,11 @@ const getAllUsers = async (req, res) => {
 
 const getUserProfile = async (req, res) => {
     const userId = req.query.userIdNum
+    const adminId = req.user_id
+    const match = userId == adminId
     try {
         const userData = await db.getProfileDataFromDb(userId)
-        return res.json({ status: 200, userData: userData[0] })
+        return res.json({ status: 200, userData: userData[0], matchFlag: match })
     } catch (error) {
         return res.json({ status: 500, error: error.message })
     }
