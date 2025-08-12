@@ -60,9 +60,10 @@ async function main() {
     try {
         await client.connect();
         // await client.query(createUserSQL);
-        await client.query(createLikedByTable);
-        // await client.query(`ALTER TABLE users ADD COLUMN user_location TEXT;
-        // `);
+        // await client.query(createLikedByTable);
+        await client.query(`ALTER TABLE users ADD COLUMN avatar TEXT DEFAULT 'https://res.cloudinary.com/df0xhk8mc/image/upload/v1755015472/placeholder_f8zktt.svg';
+        `);
+
         console.log('Done!');
     } catch (err) {
         console.error('Error executing query:', err);

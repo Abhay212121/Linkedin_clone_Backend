@@ -25,7 +25,7 @@ const savePostInDb = async (userId, postContent, imgUrl) => {
 const getAllPosts = async () => {
     try {
         const { rows } = await pool.query(`
-        SELECT posts.*, users.user_name, users.user_jobrole, users.user_mail 
+        SELECT posts.*, users.user_name, users.user_jobrole, users.user_mail, users.avatar 
         FROM posts 
         JOIN users ON posts.user_id = users.user_id
         ORDER BY posts.created_at DESC
@@ -136,7 +136,7 @@ const getAllUsersThatMatchesSearch = async (searchTerm) => {
 
 const getProfileDataFromDb = async (id) => {
     try {
-        const { rows } = await pool.query(`SELECT user_id,user_name,user_mail,user_jobrole,created_at,user_description,user_skills,user_location FROM users WHERE user_id = $1`, [id])
+        const { rows } = await pool.query(`SELECT user_id,user_name,user_mail,user_jobrole,created_at,user_description,user_skills,user_location,avatar FROM users WHERE user_id = $1`, [id])
         return rows
     } catch (error) {
         console.log(error.message)
@@ -146,7 +146,7 @@ const getProfileDataFromDb = async (id) => {
 const getAllPostsByUserId = async (id) => {
     try {
         const { rows } = await pool.query(`
-        SELECT posts.*, users.user_name, users.user_jobrole, users.user_mail 
+        SELECT posts.*, users.user_name, users.user_jobrole, users.user_mail, users.avatar 
         FROM posts 
         JOIN users ON posts.user_id = users.user_id
         WHERE users.user_id = $1
@@ -166,4 +166,21 @@ const checkIfLiked = async (postId, userId) => {
     }
 }
 
-module.exports = { addUserToDb, getUserFromDb, savePostInDb, getAllPosts, updateUserProfile, updateLike, getPostDataById, getCommentsByPostId, addNewComment, getAllUsersThatMatchesSearch, getProfileDataFromDb, getAllPostsByUserId, checkIfLiked }
+const updateUserPfpInDb = async (imgUrl, userId) => {
+    try {
+        await pool.query(`UPDATE users SET avatar = $1 WHERE user_id = $2`, [imgUrl, userId])
+    } catch (error) {
+        console.log(error.message)
+    }
+}
+
+const getPfpFromDb = async (userId) => {
+    try {
+        const { rows } = await pool.query(`SELECT avatar FROM users WHERE user_id = $1`, [userId])
+        return rows[0]
+    } catch (error) {
+        console.log('ERROR:', error.message)
+    }
+}
+
+module.exports = { addUserToDb, getUserFromDb, savePostInDb, getAllPosts, updateUserProfile, updateLike, getPostDataById, getCommentsByPostId, addNewComment, getAllUsersThatMatchesSearch, getProfileDataFromDb, getAllPostsByUserId, checkIfLiked, updateUserPfpInDb, getPfpFromDb }

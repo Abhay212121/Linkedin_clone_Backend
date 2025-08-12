@@ -3,6 +3,7 @@ const { body, validationResult } = require("express-validator")
 const db = require('../db/queries')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
+const cloudinary = require('../services/cloudinary')
 
 
 const userNameRegex = /^(?!\s*$)[A-Za-z0-9 ]+$/;
@@ -119,4 +120,53 @@ const getUserProfile = async (req, res) => {
     }
 }
 
-module.exports = { postUserToDb, loginUser, updateProfile, getAllUsers, getUserProfile }
+const updateUserPfp = async (req, res) => {
+    const image = req.file;
+    const userId = req.user_id
+
+    try {
+        let imgUrl = null;
+
+        if (image) {
+            const uploadImage = await new Promise((resolve, reject) => {
+                const stream = cloudinary.uploader.upload_stream(
+                    {
+                        resource_type: 'image',
+                        folder: 'profile_pics',
+                        transformation: [
+                            { width: 400, height: 400, crop: 'fill', gravity: 'face' }, // square crop, focus on face
+                            { quality: 'auto' },                                        // auto compression
+                            { fetch_format: 'auto' }                                    // serve WebP/AVIF when possible
+                        ]
+                    },
+                    (error, result) => {
+                        if (error) reject(error);
+                        else resolve(result);
+                    }
+                );
+
+                stream.end(image.buffer);
+            });
+
+            imgUrl = uploadImage.secure_url;
+        }
+
+        await db.updateUserPfpInDb(imgUrl, userId)
+        return res.json({ status: 200, msg: 'PFP UPDATED!' })
+    } catch (error) {
+        console.log(error.message)
+        return res.json({ status: 500, msg: error.message })
+    }
+}
+
+const getUserPfp = async (req, res) => {
+    const userId = req.user_id
+    try {
+        const img = await db.getPfpFromDb(userId)
+        return res.json({ status: 200, pfp: img.avatar })
+    } catch (error) {
+        return res.json({ status: 500, msg: error.message })
+    }
+}
+
+module.exports = { postUserToDb, loginUser, updateProfile, getAllUsers, getUserProfile, updateUserPfp, getUserPfp }

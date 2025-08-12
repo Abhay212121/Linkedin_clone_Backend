@@ -7,7 +7,6 @@ const verifyToken = async (req, res, next) => {
     const authHeader = req.headers['authorization']
     const token = authHeader?.split(' ')[1]
 
-
     if (!token) {
         return res.json({ msg: 'Access denied as no token found!' })
     }
@@ -24,6 +23,7 @@ const verifyToken = async (req, res, next) => {
             return res.json({ status: 404, msg: 'User not found!' })
         }
     } catch (error) {
+        console.log(error.message)
         return res.json({ status: 500, msg: error.message })
     }
 
