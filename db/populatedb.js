@@ -38,6 +38,18 @@ CREATE TABLE IF NOT EXISTS comments(
 const addComment = `
 INSERT INTO comments(post_id,comment_content,user_id) VALUES(12,'Excellent Work!👍👍',7);
 `
+const createLikedByTable = `
+DROP TABLE IF EXISTS liked_by;
+
+CREATE TABLE IF NOT EXISTS liked_by (
+    id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    post_id INTEGER NOT NULL REFERENCES posts(post_id) ON DELETE CASCADE,
+    user_id INTEGER NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (post_id, user_id) -- prevents duplicate likes
+);
+
+`
 
 async function main() {
     console.log('Sending...');
@@ -48,9 +60,9 @@ async function main() {
     try {
         await client.connect();
         // await client.query(createUserSQL);
-        // await client.query(postSQL);
-        await client.query(`ALTER TABLE users ADD COLUMN user_location TEXT;
-        `);
+        await client.query(createLikedByTable);
+        // await client.query(`ALTER TABLE users ADD COLUMN user_location TEXT;
+        // `);
         console.log('Done!');
     } catch (err) {
         console.error('Error executing query:', err);

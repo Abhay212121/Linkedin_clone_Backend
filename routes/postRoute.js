@@ -1,5 +1,5 @@
 const { Router } = require('express')
-const { createPost, getPosts, updateLike, getPostData, getcomments, addNewComment, getuserposts } = require('../controllers/postController')
+const { createPost, getPosts, updateLike, getPostData, getcomments, addNewComment, getuserposts, checkIfLikedByUser } = require('../controllers/postController')
 const verifyToken = require('../middlewares/authMiddleware')
 const multer = require('multer')
 
@@ -14,5 +14,6 @@ postRoute.post('/updatelike', verifyToken, updateLike)
 postRoute.get('/getpostdata', getPostData)
 postRoute.get('/getcomments', getcomments)
 postRoute.post('/addcomment', verifyToken, addNewComment)
+postRoute.get('/checkifliked', verifyToken, checkIfLikedByUser)
 
 module.exports = postRoute

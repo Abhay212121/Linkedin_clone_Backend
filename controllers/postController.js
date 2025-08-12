@@ -59,10 +59,11 @@ const getPosts = async (req, res) => {
 
 const updateLike = async (req, res) => {
     const { postId, like } = req.body;
+    const userId = req.user_id
 
     try {
         const countChange = like ? 1 : -1;
-        await db.updateLike(countChange, postId)
+        await db.updateLike(countChange, postId, userId)
         return res.json({ status: 200, msg: "Like updated" });
     } catch (error) {
         return res.json({ status: 500, msg: error.message });
@@ -114,4 +115,21 @@ const getuserposts = async (req, res) => {
     }
 }
 
-module.exports = { createPost, getPosts, updateLike, getPostData, getcomments, addNewComment, getuserposts }
+const checkIfLikedByUser = async (req, res) => {
+    const userId = req.user_id
+    const postId = req.query.postId
+    let ans;
+    try {
+        const result = await db.checkIfLiked(postId, userId)
+        if (result.length != 0) {
+            ans = true;
+        } else {
+            ans = false;
+        }
+        return res.json({ status: 200, ans: ans })
+    } catch (error) {
+        return res.json({ status: 500, msg: error.message })
+    }
+}
+
+module.exports = { createPost, getPosts, updateLike, getPostData, getcomments, addNewComment, getuserposts, checkIfLikedByUser }

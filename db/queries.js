@@ -54,11 +54,32 @@ const updateUserProfile = async (job, email, location, about, skills) => {
 };
 
 
-const updateLike = async (countChange, postId) => {
-    await pool.query(
-        `UPDATE posts SET like_count = like_count + $1 WHERE post_id = $2`,
-        [countChange, postId]
-    );
+const updateLike = async (countChange, postId, userId) => {
+    try {
+        await pool.query(
+            `UPDATE posts SET like_count = like_count + $1 WHERE post_id = $2`,
+            [countChange, postId]
+        );
+        if (countChange > 0) {
+            // Like: insert if not already liked
+            await pool.query(
+                `INSERT INTO liked_by (post_id, user_id) 
+           VALUES ($1, $2) 
+           ON CONFLICT (post_id, user_id) DO NOTHING`,
+                [postId, userId]
+            );
+        } else {
+            // Unlike: remove the record
+            await pool.query(
+                `DELETE FROM liked_by 
+           WHERE post_id = $1 AND user_id = $2`,
+                [postId, userId]
+            );
+        }
+
+    } catch (error) {
+        console.log(error.message)
+    }
 }
 
 const getPostDataById = async (id) => {
@@ -136,4 +157,13 @@ const getAllPostsByUserId = async (id) => {
     }
 }
 
-module.exports = { addUserToDb, getUserFromDb, savePostInDb, getAllPosts, updateUserProfile, updateLike, getPostDataById, getCommentsByPostId, addNewComment, getAllUsersThatMatchesSearch, getProfileDataFromDb, getAllPostsByUserId }
+const checkIfLiked = async (postId, userId) => {
+    try {
+        const { rows } = await pool.query(`SELECT * FROM liked_by WHERE post_id = $1 AND user_id = $2`, [postId, userId])
+        return rows
+    } catch (error) {
+        console.log(error.message)
+    }
+}
+
+module.exports = { addUserToDb, getUserFromDb, savePostInDb, getAllPosts, updateUserProfile, updateLike, getPostDataById, getCommentsByPostId, addNewComment, getAllUsersThatMatchesSearch, getProfileDataFromDb, getAllPostsByUserId, checkIfLiked }
